@@ -300,13 +300,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   removeLocalStorageMessages("messages");
   let storedMessages = localStorage.getItem("messages");
 
-  if (storedMessages) {
-    cachedMessages = JSON.parse(storedMessages); // Load from cache
-    cachedMessages.forEach(displayMessage);
-  } else {
+  // if (storedMessages) {
+  //   cachedMessages = JSON.parse(storedMessages); // Load from cache
+  //   cachedMessages.forEach(displayMessage);
+  // } else {
     cachedMessages = await fetchMessages(); // Fetch from API
-    localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Store in localStorage
-  }
+    // localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Store in localStorage
+  // }
 });
 
 // Handle form submission
@@ -323,7 +323,7 @@ document.getElementById("messageForm").addEventListener("submit", async function
 
   let newMessage = { name, message };
   cachedMessages.push(newMessage);  // Update in-memory cache
-  localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Update local cache
+  // localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Update local cache
 
   displayMessage(newMessage);
 
