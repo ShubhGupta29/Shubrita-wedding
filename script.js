@@ -297,6 +297,7 @@ const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 // Load messages when the page loads
 document.addEventListener("DOMContentLoaded", async function () {
   // document.getElementById("formName").onblur = setTimeout(alert("called key"), 60000);
+  removeLocalStorageMessages("messages");
   let storedMessages = localStorage.getItem("messages");
 
   if (storedMessages) {
