@@ -295,104 +295,74 @@ const API_KEY = "$2a$10$qQjvFNzVpqCAsHJWy6yiieNLA2QCVByRJXgbAsR7uo656RYpwiZOO"; 
 const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
 // Load messages when the page loads
-document.addEventListener("DOMContentLoaded", async function () {
-  // document.getElementById("formName").onblur = setTimeout(alert("called key"), 60000);
-  removeLocalStorageMessages("messages");
-  let storedMessages = localStorage.getItem("messages");
-
-  // if (storedMessages) {
-  //   cachedMessages = JSON.parse(storedMessages); // Load from cache
-  //   cachedMessages.forEach(displayMessage);
-  // } else {
-    cachedMessages = await fetchMessages(); // Fetch from API
-    // localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Store in localStorage
-  // }
+document.addEventListener("DOMContentLoaded", function () {
+    fetchMessages();
 });
 
 // Handle form submission
 document.getElementById("messageForm").addEventListener("submit", async function (event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  let name = document.getElementById("formName").value.trim();
-  let message = document.getElementById("formMessage").value.trim();
+    let name = document.getElementById("name").value.trim();
+    let message = document.getElementById("message").value.trim();
 
-  if (!name || !message) {
-    alert("Please fill in both fields.");
-    return;
-  }
+    if (!name || !message) {
+        alert("Please fill in both fields.");
+        return;
+    }
 
-  let newMessage = { name, message };
-  cachedMessages.push(newMessage);  // Update in-memory cache
-  // localStorage.setItem("messages", JSON.stringify(cachedMessages)); // Update local cache
+    let newMessage = { name, message };
 
-  displayMessage(newMessage);
+    // Fetch existing messages and update
+    let messages = await fetchMessages();
+    messages.push(newMessage);
+    
+    await saveMessages(messages);
+    displayMessage(newMessage);
 
-  // Delayed API update (every 10 seconds)
-  debounceSaveMessages();
-
-  document.getElementById("formName").value = "";
-  document.getElementById("formMessage").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("message").value = "";
 });
 
-function removeLocalStorageMessages(key) {
-
-  localStorage.removeItem(key);
-}
-
-// Fetch messages from JSONBin (only on first load)
+// Fetch messages from JSONBin
 async function fetchMessages() {
-  try {
-    let response = await fetch(API_URL, {
-      headers: { "X-Master-Key": API_KEY }
-    });
-    let data = await response.json();
-    return data.record.messages || {
-      "messages": [
-        {
-          "name": "Kiran Gupta",
-          "message": "<3\nGod Bless You"
-        },
-        {
-          "name": "Tester",
-          "message": "All the best ❤️"
-        }
-      ]
-    };
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    return [];
-  }
+    try {
+        let response = await fetch(API_URL, {
+            headers: { "X-Master-Key": API_KEY }
+        });
+        let data = await response.json();
+        let messages = data.record.messages || [];
+        
+        document.getElementById("messageDisplay").innerHTML = "";
+        messages.forEach(displayMessage);
+
+        return messages;
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        return [];
+    }
 }
 
-// Debounced API update function (limits API calls)
-let debounceTimer;
-function debounceSaveMessages() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    saveMessages(cachedMessages);
-  }, 10000); // Delay API call for 10 seconds
-}
-
-// Save messages to JSONBin (only called after debounce)
+// Save messages to JSONBin
 async function saveMessages(messages) {
-  try {
-    await fetch(API_URL, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": API_KEY
-      },
-      body: JSON.stringify({ messages })
-    });
-  } catch (error) {
-    console.error("Error saving messages:", error);
-  }
+    try {
+        await fetch(API_URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": API_KEY
+            },
+            body: JSON.stringify({ messages })
+        });
+    } catch (error) {
+        console.error("Error saving messages:", error);
+    }
 }
 
 // Display a message on the page
 function displayMessage({ name, message }) {
-  let messageContainer = document.getElementById("messageDisplay");
-  let newMessage = document.createElement("p");
-  newMessage.innerHTML = `<strong>${name}:</strong> ${message}`;
-  messageContainer.appendChild(newMessage);
+    let messageContainer = document.getElementById("messageDisplay");
+    let newMessage = document.createElement("p");
+    newMessage.innerHTML = `<strong>${name}:</strong> ${message}`;
+    messageContainer.appendChild(newMessage);
 }
